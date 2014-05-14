@@ -9,14 +9,13 @@ import re
 from bs4 import BeautifulSoup
 from urlparse import urlparse
 import html5lib
-import csv
 
 
 # In[ ]:
 
 data = tablib.Dataset()
 
-data.headers = ['game date', 'away', 'home', 'espn id']
+data.headers = ['game date', 'away', 'home', 'espn id', 'home score', 'away score']
 
 root_url = 'http://scores.espn.go.com/nhl/scoreboard?date='
 
@@ -63,18 +62,30 @@ def home(soup):
     return home_team
 
 
-# In[ ]:
+# In[1]:
 
-def twenty_four_hr_time(text):
-    if 'TBD' in text.upper():
-        return text
-    else:
-        time_conversion = {'PM': '12', 'ET': '3', 'AM': '00'}
-        split = text.split()
-        time = split[0].split(':')
-        convert = int(time[0]) + int(time_conversion.get(split[1])) - int(time_conversion.get(split[2]))
-        new_time = str(convert) + ":" + time[1]
-        return new_time
+def awayScore(gameID):
+    url = 'http://espn.go.com/nhl/playbyplay?gameId='+str(gameID)+'&period=0'
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'html5lib')
+    try:
+        score = soup.find(class_='gp-awayScore').text
+    except AttributeError:
+        score = ""
+    return score
+
+
+# In[2]:
+
+def homeScore(gameID):
+    url = 'http://espn.go.com/nhl/playbyplay?gameId='+str(gameID)+'&period=0'
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'html5lib')
+    try:
+        score = soup.find(class_='gp-homeScore').text
+    except AttributeError:
+        score = ""
+    return score
 
 
 # In[ ]:
@@ -85,11 +96,6 @@ def espn_id_link(soup):
         if 'conversation' in link['href']:
             text = link['href']
     return text
-
-
-# In[ ]:
-
-
 
 
 # In[ ]:
@@ -124,7 +130,7 @@ def make_schedule():
             r = requests.get(url)
             soup = BeautifulSoup(r.text, 'html5lib')
             for x in games_for_day(soup):
-                data.append([str(day), team_names.get(away(x)), team_names.get(home(x)), espn_id(x)])
+                data.append([str(day), team_names.get(away(x)), team_names.get(home(x)), espn_id(x), homeScore(espn_id(x)), awayScore(espn_id(x))])
 
 
 # In[ ]:
@@ -133,7 +139,10 @@ make_schedule()
 
 
 # In[ ]:
+
 open('20132014_games.xls', 'w').write(data.xls)
+
+
 # In[ ]:
 
 
