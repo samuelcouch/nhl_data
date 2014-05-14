@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[4]:
 
 import requests
 import tablib
@@ -11,7 +11,7 @@ from urlparse import urlparse
 import html5lib
 
 
-# In[ ]:
+# In[5]:
 
 data = tablib.Dataset()
 
@@ -27,6 +27,8 @@ month_schedule = {'oct': {'start': 20131001, 'end': 20131031},
                   'mar': {'start': 20140301, 'end': 20140331},
                   'apr': {'start': 20140401, 'end': 20140430},
                   'may': {'start': 20140501, 'end': 20140531}}
+flagged = tablib.Dataset()
+flagged.headers = ['espn id']
 
 
 # In[ ]:
@@ -62,7 +64,7 @@ def home(soup):
     return home_team
 
 
-# In[1]:
+# In[6]:
 
 def getScores(gameID):
     scores = {}
@@ -73,10 +75,12 @@ def getScores(gameID):
         scores['away'] = soup.find(class_='gp-awayScore').text
     except AttributeError:
         scores['away'] = ""
+        flagged.append([gameID])
     try:
         scores['home'] = soup.find(class_='gp-homeScore').text
     except AttributeError:
         scores['home'] = ""
+        flagged.append([gameID])
     return scores
 
 
@@ -134,14 +138,18 @@ def make_schedule():
 make_schedule()
 
 
-# In[ ]:
+# In[7]:
 
 open('20132014_games.xls', 'w').write(data.xls)
+open('flagged_games.xls', 'w').write(flagged.xls)
 
 
-# In[ ]:
+# In[8]:
 
-
+with open('20132014_games.csv', 'wb') as f:
+    f.write(data.csv)
+with open('flagged_games.csv', 'wb') as f:
+    f.write(flagged.csv)
 
 
 # In[ ]:
