@@ -64,28 +64,20 @@ def home(soup):
 
 # In[1]:
 
-def awayScore(gameID):
+def getScores(gameID):
+    scores = {}
     url = 'http://espn.go.com/nhl/playbyplay?gameId='+str(gameID)+'&period=0'
     r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html5lib')
     try:
-        score = soup.find(class_='gp-awayScore').text
+        scores['away'] = soup.find(class_='gp-awayScore').text
     except AttributeError:
-        score = ""
-    return score
-
-
-# In[2]:
-
-def homeScore(gameID):
-    url = 'http://espn.go.com/nhl/playbyplay?gameId='+str(gameID)+'&period=0'
-    r = requests.get(url)
-    soup = BeautifulSoup(r.text, 'html5lib')
+        scores['away'] = ""
     try:
-        score = soup.find(class_='gp-homeScore').text
+        scores['home'] = soup.find(class_='gp-homeScore').text
     except AttributeError:
-        score = ""
-    return score
+        scores['home'] = ""
+    return scores
 
 
 # In[ ]:
@@ -120,7 +112,7 @@ team_names = {'Devils': 'NJD', 'Blackhawks': 'CHI', 'Islanders': 'NYI',
               'Jets': 'WPG', 'Sharks': 'SJS', 'Flames': 'CGY'}
 
 
-# In[ ]:
+# In[2]:
 
 def make_schedule():
     # Will make nhl schedule for games to be played
@@ -130,7 +122,11 @@ def make_schedule():
             r = requests.get(url)
             soup = BeautifulSoup(r.text, 'html5lib')
             for x in games_for_day(soup):
-                data.append([str(day), team_names.get(away(x)), team_names.get(home(x)), espn_id(x), homeScore(espn_id(x)), awayScore(espn_id(x))])
+                away = team_names.get(away(x))
+                home = team_names.get(home(x))
+                espnID = espn_id(x)
+                scores = getScores(espnID)
+                data.append([str(day), away, home, espnID, scores['home'], scores['away']])
 
 
 # In[ ]:
