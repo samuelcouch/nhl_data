@@ -1,0 +1,1 @@
+Python tool to scrape NHL scores from ESPN for the 2013-14 season. iPython notebook and its exported .py included. Scraper inspired by [https://github.com/fnava621/nhl_schedule](https://github.com/fnava621/nhl_schedule)
