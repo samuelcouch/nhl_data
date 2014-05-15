@@ -64,9 +64,34 @@ def home(soup):
     return home_team
 
 
+# In[1]:
+
+def firstGoal(soup):
+    table = soup.find('table', {"class": "mod-data"})
+    data = soup.find('table', {"class": "mod-data"}).findAll('tr')
+    goal = False
+    time_count = ""
+    period = 1
+    for tr in data:
+        cells = tr.find_all('td')
+        if not goal:
+            try:
+                time = cells[0].text
+                team = cells[1].text
+                details = cells[2].text
+                if "Goal scored by " in details:
+                    goal = True
+            except:
+                flagged.append([gameID])
+                time = ''
+                team = ''
+                details = ''
+                continue
+
+
 # In[6]:
 
-def getScores(gameID):
+def scoringData(gameID):
     scores = {}
     url = 'http://espn.go.com/nhl/playbyplay?gameId='+str(gameID)+'&period=0'
     r = requests.get(url)
